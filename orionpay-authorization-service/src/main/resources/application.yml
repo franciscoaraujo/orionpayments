@@ -1,0 +1,86 @@
+# ===================================================================
+# SERVER CONFIGURATION
+# ===================================================================
+server:
+  port: 8080
+
+# ===================================================================
+# SPRING BOOT APPLICATION CONFIGURATION
+# ===================================================================
+spring:
+  application:
+    name: orionpay-authorization-service
+
+  # --- Database Configuration ---
+  # Usando placeholders consistentes para flexibilidade
+  datasource:
+    #url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:orionpay-db}
+    #username: ${DB_USER:user}
+    #password: ${DB_PASS:password}
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/orionpay-db
+    username: ${SPRING_DATASOURCE_USERNAME:user}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      # 'validate' é a estratégia mais segura para produção. Use 'update' para desenvolvimento.
+      ddl-auto: validate
+    show-sql: false
+
+  # --- Security Configuration (Resource Server) ---
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Valida o 'issuer' no token (deve ser o endereço público)
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://service-identity:9090}
+          # Descobre as chaves de validação (deve ser o endereço interno da rede Docker)
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:}
+
+  # --- Cache & Redis Configuration ---
+  cache:
+    type: redis
+  data:
+    redis: # CORRIGIDO: O caminho correto da propriedade é 'spring.data.redis'
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  # --- Kafka Configuration ---
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+# ===================================================================
+# RESILIENCE4J CONFIGURATION
+# ===================================================================
+resilience4j:
+  circuitbreaker:
+    instances:
+      bandeira:
+        register-health-indicator: true
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 20
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 5
+  retry:
+    instances:
+      bandeira:
+        max-attempts: 3
+        wait-duration: 200ms
+  timelimiter:
+    instances:
+      bandeira:
+        timeout-duration: 3s
+
+# ===================================================================
+# CUSTOM APPLICATION PROPERTIES
+# ===================================================================
+orionpay:
+  topics:
+    payment-authorized: "payments.authorizations"
+  outbox:
+    scheduler:
+      delay: 10000 # 10 seconds
