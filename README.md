@@ -1,9 +1,3 @@
-Com certeza. Criei um `README.md` completo e profissional para o projeto, ideal para ser a página inicial de um repositório no GitHub.
-
-Ele é mais conciso que a documentação técnica, focado em apresentar o projeto e guiar um novo desenvolvedor a executá-lo rapidamente.
-
------
-
 # **OrionPay - Ecossistema de Processamento de Pagamentos**
 
 **OrionPay** é um projeto de simulação de um ecossistema de processamento de pagamentos, construído com uma arquitetura moderna de microserviços. O projeto foi desenvolvido para ser um estudo de caso prático sobre a criação de sistemas distribuídos, resilientes, seguros e escaláveis, utilizando as melhores práticas do mercado para aplicações financeiras.
