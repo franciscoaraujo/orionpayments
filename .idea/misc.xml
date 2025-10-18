@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/orionpay-authorization-service/pom.xml" />
         <option value="$PROJECT_DIR$/demo/pom.xml" />
         <option value="$PROJECT_DIR$/service-capture/pom.xml" />
+        <option value="$PROJECT_DIR$/service-settlement/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

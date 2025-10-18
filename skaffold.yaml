@@ -17,6 +17,10 @@ build:
       context: ./service-capture
       docker:
         dockerfile: Dockerfile  # Same as above
+    - image: service-settlement:0.0.1-SNAPSHOT
+      context: ./service-settlement # Adicione o novo serviço
+      docker:
+        dockerfile: Dockerfile
   tagPolicy:
     sha256: {}
 
@@ -43,3 +47,8 @@ portForward:
     namespace: orionpay
     port: 8082
     localPort: 8082
+  - resourceType: service
+    resourceName: service-settlement # Adicione o novo port-forward
+    namespace: orionpay
+    port: 8083
+    localPort: 8083

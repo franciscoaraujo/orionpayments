@@ -1,0 +1,54 @@
+# Arquivo: k8s-manifests/09-service-settlement.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-settlement
+  namespace: orionpay
+spec:
+  selector:
+    app: service-settlement
+  ports:
+    - protocol: TCP
+      port: 8083
+      targetPort: 8083
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-settlement
+  namespace: orionpay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-settlement
+  template:
+    metadata:
+      labels:
+        app: service-settlement
+    spec:
+      containers:
+        - name: service-settlement
+          image: service-settlement:0.0.1-SNAPSHOT # Nome da imagem
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8083
+          env:
+            - name: DB_HOST
+              value: "postgres"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: DB_USER
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: DB_PASS
+            - name: DB_NAME
+              value: "orionpay_settlement"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka:9092"
+          readinessProbe: # ...
+          livenessProbe: # ...

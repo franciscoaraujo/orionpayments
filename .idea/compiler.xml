@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="service-identity" />
+        <module name="service-settlement" />
         <module name="service-capture" />
       </profile>
       <profile name="Annotation profile for orionpay-authorization-service" enabled="true">
@@ -34,6 +35,7 @@
       <module name="orionpay-authorization-service" options="-parameters -Amapstruct.defaultComponentModel=spring" />
       <module name="service-capture" options="-parameters" />
       <module name="service-identity" options="-parameters" />
+      <module name="service-settlement" options="-parameters" />
     </option>
   </component>
 </project>

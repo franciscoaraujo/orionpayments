@@ -1,0 +1,35 @@
+server:
+  port: 8083 # Nova porta para este serviço
+
+spring:
+  application:
+    name: servico-liquidacao
+
+  # --- Configuração do Banco de Dados (Schema separado) ---
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/orionpay_settlement
+    username: ${DB_USER:user}
+    password: ${DB_PASS:password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  # --- Configuração do Kafka (Consumidor e Produtor) ---
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: settlement-group
+      # ...
+    producer:
+    # ...
+
+# === Tópicos Kafka e Configurações Customizadas ===
+orionpay:
+  topics:
+    payment-captured: "payments.captures"
+    settlement-processed: "settlements.processed"
+    # Adicionar o nome do tópico da DLQ
+    settlement-dlq: "payments.captures.dlq"
+  scheduler:
+    cron: "0 */5 * * * *"
