@@ -1,0 +1,65 @@
+---
+# Arquivo: k8s-manifests/06-service-identity.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-identity
+  namespace: orionpay
+spec:
+  selector:
+    app: service-identity
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-identity
+  namespace: orionpay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-identity
+  template:
+    metadata:
+      labels:
+        app: service-identity
+    spec:
+      containers:
+        - name: service-identity
+          image: service-identity:0.0.1-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9090
+          env:
+            - name: DB_HOST
+              value: "postgres"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: DB_USER
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: DB_PASS
+            - name: DB_NAME
+              value: "orionpay_identity"
+            - name: OAUTH_ISSUER_URI
+              value: "http://service-identity:9090" # Endereço interno para descoberta
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9090
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9090
+            initialDelaySeconds: 45
+            periodSeconds: 20

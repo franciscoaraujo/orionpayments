@@ -1,0 +1,69 @@
+---
+# Arquivo: k8s-manifests/07-service-authorization.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: orionpay-authorization-service
+  namespace: orionpay
+spec:
+  selector:
+    app: orionpay-authorization-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orionpay-authorization-service
+  namespace: orionpay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orionpay-authorization-service
+  template:
+    metadata:
+      labels:
+        app: orionpay-authorization-service
+    spec:
+      containers:
+        - name: orionpay-authorization-service
+          image: orionpay-authorization-service:0.0.1-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: "postgres"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: DB_USER
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: DB_PASS
+            - name: DB_NAME
+              value: "orionpay"
+            - name: REDIS_HOST
+              value: "redis"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka:9092"
+            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
+              value: "http://service-identity:9090"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 45
+            periodSeconds: 20

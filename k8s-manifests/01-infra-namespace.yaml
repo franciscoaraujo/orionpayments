@@ -1,0 +1,7 @@
+---
+# Arquivo: k8s-manifests/01-infra-namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: orionpay
+

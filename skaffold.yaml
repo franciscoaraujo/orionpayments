@@ -1,0 +1,45 @@
+apiVersion: skaffold/v4beta7
+kind: Config
+metadata:
+  name: orionpay
+
+build:
+  artifacts:
+    - image: orionpay-authorization-service
+      context: ./orionpay-authorization-service
+      docker:
+        dockerfile: Dockerfile  # Add this if your Dockerfile has a non-default name; otherwise, Skaffold defaults to 'Dockerfile'
+    - image: service-identity
+      context: ./service-identity
+      docker:
+        dockerfile: Dockerfile  # Same as above
+    - image: service-capture
+      context: ./service-capture
+      docker:
+        dockerfile: Dockerfile  # Same as above
+  tagPolicy:
+    sha256: {}
+
+manifests:
+  rawYaml:
+    - k8s-manifests/*.yaml  # Globs are supported; ensure these files exist and reference the image tags from 'build.artifacts'
+
+deploy:
+  kubectl: {}  # Empty config; uses manifests from the root 'manifests' section
+
+portForward:
+  - resourceType: service
+    resourceName: orionpay-authorization-service
+    namespace: orionpay  # Ensure your manifests deploy to this namespace (e.g., via 'metadata.namespace' or kubectl apply --namespace)
+    port: 8080
+    localPort: 8080
+  - resourceType: service
+    resourceName: service-identity
+    namespace: orionpay
+    port: 9090
+    localPort: 9090
+  - resourceType: service
+    resourceName: service-capture
+    namespace: orionpay
+    port: 8082
+    localPort: 8082

@@ -1,0 +1,65 @@
+---
+# Arquivo: k8s-manifests/08-service-capture.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-capture
+  namespace: orionpay
+spec:
+  selector:
+    app: service-capture
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-capture
+  namespace: orionpay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-capture
+  template:
+    metadata:
+      labels:
+        app: service-capture
+    spec:
+      containers:
+        - name: service-capture
+          image: service-capture:0.0.1-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          env:
+            - name: DB_HOST
+              value: "postgres"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: DB_USER
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: DB_PASS
+            - name: DB_NAME
+              value: "orionpay_capture"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka:9092"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            initialDelaySeconds: 45
+            periodSeconds: 20
