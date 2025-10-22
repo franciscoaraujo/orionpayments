@@ -1,0 +1,17 @@
+# ConfigMap para o script de inicialização do banco de dados
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-db
+  namespace: orionpay
+data:
+  init-db.sh: |
+    #!/bin/bash
+    set -e
+    # --- CORREÇÃO: Ligar à base de dados 'postgres' (que existe sempre) ---
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "postgres" <<-EOSQL
+        CREATE DATABASE orionpay_identity;
+        CREATE DATABASE orionpay_capture;
+        CREATE DATABASE orionpay_settlement;
+        CREATE DATABASE orionpay_db;
+    EOSQL

@@ -20,6 +20,7 @@ metadata:
   namespace: orionpay
 spec:
   replicas: 1
+  progressDeadlineSeconds: 600 # <--- ADICIONE ESTA LINHA
   selector:
     matchLabels:
       app: postgres
@@ -47,4 +48,11 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: DB_PASS
-
+          volumeMounts:
+            - name: postgres-init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: postgres-init-scripts
+          configMap:
+            name: postgres-init-db
+            defaultMode: 0755 # Torna o script executável

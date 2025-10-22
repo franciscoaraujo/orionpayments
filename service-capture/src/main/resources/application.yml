@@ -6,7 +6,7 @@ spring:
     name: service-capture
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:postgres}:5432/orionpay-db
+    url: jdbc:postgresql://${DB_HOST:postgres}:5432/orionpay_capture
     username: ${DB_USER:user}
     password: ${DB_PASS:password}
     driver-class-name: org.postgresql.Driver
@@ -16,7 +16,7 @@ spring:
     show-sql: true
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-service:9092}
     consumer:
       group-id: capture-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer

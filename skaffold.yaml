@@ -8,17 +8,17 @@ build:
     - image: orionpay-authorization-service
       context: ./orionpay-authorization-service
       docker:
-        dockerfile: Dockerfile  # Add this if your Dockerfile has a non-default name; otherwise, Skaffold defaults to 'Dockerfile'
+        dockerfile: Dockerfile
     - image: service-identity
       context: ./service-identity
       docker:
-        dockerfile: Dockerfile  # Same as above
+        dockerfile: Dockerfile
     - image: service-capture
       context: ./service-capture
       docker:
-        dockerfile: Dockerfile  # Same as above
-    - image: service-settlement:0.0.1-SNAPSHOT
-      context: ./service-settlement # Adicione o novo serviço
+        dockerfile: Dockerfile
+    - image: service-settlement
+      context: ./service-settlement
       docker:
         dockerfile: Dockerfile
   tagPolicy:
@@ -26,15 +26,15 @@ build:
 
 manifests:
   rawYaml:
-    - k8s-manifests/*.yaml  # Globs are supported; ensure these files exist and reference the image tags from 'build.artifacts'
+    - k8s-manifests/*.yaml
 
 deploy:
-  kubectl: {}  # Empty config; uses manifests from the root 'manifests' section
+  kubectl: {}
 
 portForward:
   - resourceType: service
     resourceName: orionpay-authorization-service
-    namespace: orionpay  # Ensure your manifests deploy to this namespace (e.g., via 'metadata.namespace' or kubectl apply --namespace)
+    namespace: orionpay
     port: 8080
     localPort: 8080
   - resourceType: service
@@ -48,7 +48,7 @@ portForward:
     port: 8082
     localPort: 8082
   - resourceType: service
-    resourceName: service-settlement # Adicione o novo port-forward
+    resourceName: service-settlement
     namespace: orionpay
     port: 8083
     localPort: 8083

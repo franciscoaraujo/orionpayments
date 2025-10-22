@@ -4,11 +4,14 @@ server:
 spring:
   application:
     name: service-identity
+  jpa:
+    hibernate:
+      ddl-auto: update
   security:
     oauth2:
       authorization-server:
         issuer: http://service-identity:9090
   datasource:
     url: jdbc:postgresql://${DB_HOST:postgres}:5432/orionpay_identity
-    username: ${SPRING_DATASOURCE_USERNAME:user}
-    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    username: ${DB_USER:user}
+    password: ${DB_PASS:password}
