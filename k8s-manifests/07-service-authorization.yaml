@@ -1,4 +1,3 @@
-# Arquivo: k8s-manifests/07-service-authorization.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -43,7 +42,7 @@ spec:
           command: ['sh', '-c', 'until nc -z service-identity 9090; do echo "auth-svc: waiting for identity"; sleep 2; done;']
       containers:
         - name: orionpay-authorization-service
-          image: orionpay-authorization-service:0.0.1-SNAPSHOT
+          image: orionpay-authorization-service
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -66,20 +65,27 @@ spec:
               value: "redis-service"
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "kafka-service:9092"
+
+            # --- CORREÇÃO DE SEGURANÇA 401 ---
+            # 1. Espera o issuer que o Postman vê (o público)
             - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
               value: "http://service-identity:9090"
+            # 2. Procura as chaves de validação na rede interna (o privado)
             - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
               value: "http://service-identity:9090/oauth2/jwks"
+            # --- FIM DA CORREÇÃO ---
 
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
-            initialDelaySeconds: 30
+            # (As suas sondas já estão corrigidas com delay de 90s, está ótimo)
+            initialDelaySeconds: 60
             periodSeconds: 15
+            failureThreshold: 10
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
-            initialDelaySeconds: 45
+            initialDelaySeconds: 120
             periodSeconds: 20

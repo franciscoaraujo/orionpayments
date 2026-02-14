@@ -1,4 +1,3 @@
----
 # Arquivo: k8s-manifests/05-infra-kafka.yaml
 
 # Zookeeper Service

@@ -1,0 +1,12 @@
+{
+  "url": "http://localhost:9090/oauth2/token",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Authorization": "Basic b3Jpb25wYXktbWVyY2hhbnQtY2xpZW50OnNlY3JldA=="
+  },
+  "body": {
+    "grant_type": "client_credentials",
+    "scope": "payments.authorize"
+  }
+}

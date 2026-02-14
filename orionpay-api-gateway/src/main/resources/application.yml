@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: orionpay-api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: authorization-service
+          uri: http://orionpay-authorization-service:8080
+          predicates:
+            - Path=/v1/payments/**
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://service-identity:9090
+          jwk-set-uri: http://service-identity:9090/oauth2/jwks
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

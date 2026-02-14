@@ -29,10 +29,11 @@ services:
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      # O POSTGRES_DB aqui é o padrão, cada serviço definirá o seu ao se conectar
-      POSTGRES_DB: orionpay-db
+      POSTGRES_DB: orionpay_db
     ports: ["5432:5432"]
-    volumes: [postgres-data:/var/lib/postgresql/data]
+    volumes:
+      - postgres-data-v4:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user"]
       interval: 10s
@@ -40,7 +41,7 @@ services:
       retries: 5
 
   redis:
-    image: redis:7-alpine
+    image: docker.io/library/redis:7-alpine
     container_name: redis
     ports: ["6379:6379"]
     healthcheck:
@@ -49,7 +50,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # --- NOSSOS MICROSSERVIÇOS ---
+  # --- MICROSSERVIÇOS ---
 
   service-identity:
     build:
@@ -62,7 +63,6 @@ services:
       - DB_HOST=postgres
       - DB_USER=user
       - DB_PASS=password
-      # Sugestão: Nome do DB também via variável para consistência
       - DB_NAME=orionpay_identity
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
@@ -75,7 +75,7 @@ services:
     build:
       context: ./orionpay-authorization-service
     container_name: orionpay-authorization-service
-    ports: ["8080:8080"]
+    ports: ["8081:8080"]
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -85,10 +85,9 @@ services:
       - DB_HOST=postgres
       - DB_USER=user
       - DB_PASS=password
-      - DB_NAME=orionpay-db
+      - DB_NAME=orionpay_db
       - REDIS_HOST=redis
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      # ✅ CORRIGIDO: Usando o nome do serviço para comunicação interna
       - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://service-identity:9090
       - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://service-identity:9090/oauth2/jwks
     healthcheck:
@@ -102,7 +101,7 @@ services:
     build:
       context: ./service-capture
     container_name: service-capture
-    ports: ["8082:8082"] # Porta do host 8082 -> porta do container 8082
+    ports: ["8082:8082"]
     depends_on:
       postgres: { condition: service_healthy }
       kafka: { condition: service_started }
@@ -110,10 +109,8 @@ services:
       - DB_HOST=postgres
       - DB_USER=user
       - DB_PASS=password
-      # ✅ CORRIGIDO: Apontando para seu próprio banco de dados isolado
       - DB_NAME=orionpay_capture
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      # ✅ REMOVIDO: Configuração de segurança desnecessária
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
       interval: 30s
@@ -121,5 +118,42 @@ services:
       retries: 5
       start_period: 30s
 
+  # ✅ ADICIONADO: Serviço de Liquidação
+  service-settlement:
+    build:
+      context: ./service-settlement
+    container_name: service-settlement
+    ports: ["8083:8083"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=user
+      - DB_PASS=password
+      - DB_NAME=orionpay_settlement
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  orionpay-api-gateway:
+    build:
+      context: orionpay-api-gateway
+    container_name: orionpay-api-gateway
+    ports: ["8080:8080"]
+    depends_on:
+      service-identity: { condition: service_healthy }
+      orionpay-authorization-service: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
 volumes:
-  postgres-data:
+  postgres-data-v4:

@@ -1,0 +1,15 @@
+{
+  "amount": 150.00,
+  "currency": "BRL",
+  "card": {
+    "holder_name": "JOAO DA SILVA",
+    "token": "4111111111111111",
+    "expiry_month": 12,
+    "expiry_year": 2030,
+    "cvv": "123"
+  },
+  "customer": {
+    "id": "cust_123456789",
+    "email": "joao.silva@example.com"
+  }
+}

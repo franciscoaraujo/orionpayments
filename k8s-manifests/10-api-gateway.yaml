@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: orionpay-api-gateway
+  namespace: orionpay
+spec:
+  selector:
+    app: orionpay-api-gateway
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orionpay-api-gateway
+  namespace: orionpay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orionpay-api-gateway
+  template:
+    metadata:
+      labels:
+        app: orionpay-api-gateway
+    spec:
+      initContainers:
+        - name: wait-for-identity
+          image: busybox:1.36
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              echo "Aguardando service-identity na porta 9090..."
+              until nc -z service-identity 9090; do
+                echo "  Ainda aguardando service-identity..."
+                sleep 5
+              done
+              echo "Identity Service detectado!"
+      containers:
+        - name: orionpay-api-gateway
+          image: orionpay-api-gateway
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            # Variáveis padrão Spring Boot
+            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
+              value: "http://service-identity:9090"
+            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
+              value: "http://service-identity:9090/oauth2/jwks"
+          # Sondas de saúde no padrão Spring Boot Actuator
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 90 # Spring Boot demora mais a carregar o contexto
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 10 # Dá tempo do serviço estabilizar mesmo com throttling
+          resources:
+            requests:
+              memory: "512Mi" # Spring costuma precisar de mais RAM que o Quarkus
+              cpu: "250m"
+            limits:
+              memory: "768Mi"
+              cpu: "500m"

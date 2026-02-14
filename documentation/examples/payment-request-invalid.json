@@ -1,0 +1,15 @@
+{
+  "amount": -50.00,
+  "currency": "",
+  "card": {
+    "holder_name": "",
+    "token": "123",
+    "expiry_month": 13,
+    "expiry_year": 2020,
+    "cvv": "12"
+  },
+  "customer": {
+    "id": "",
+    "email": "invalid-email"
+  }
+}

@@ -1,0 +1,210 @@
+{
+	"info": {
+		"_postman_id": "b6a8c2d4-1234-4321-abcd-1234567890ab",
+		"name": "OrionPay Local Env",
+		"description": "Collection para teste do ambiente local OrionPay.\n\n**Fluxo de Uso:**\n1. Execute a requisição **'1. Login (Get Token)'** primeiro.\n2. O script de teste salvará automaticamente o `access_token` nas variáveis da coleção.\n3. Execute as requisições de pagamento (o token será injetado automaticamente).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Login (Get Token)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"if (jsonData.access_token) {",
+							"    pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+							"    console.log(\"Token atualizado com sucesso!\");",
+							"}",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "secret",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "orionpay-merchant-client",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "payments.authorize",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{auth_url}}/oauth2/token",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"oauth2",
+						"token"
+					]
+				},
+				"description": "Obtém o token OAuth2 e o salva automaticamente na variável `access_token` da coleção."
+			},
+			"response": []
+		},
+		{
+			"name": "2. Create Payment (Success)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"amount\": 150.00,\n  \"currency\": \"BRL\",\n  \"card\": {\n    \"holder_name\": \"JOAO DA SILVA\",\n    \"token\": \"4111111111111111\",\n    \"expiry_month\": 12,\n    \"expiry_year\": 2030,\n    \"cvv\": \"123\"\n  },\n  \"customer\": {\n    \"id\": \"cust_123456789\",\n    \"email\": \"joao.silva@example.com\"\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{gateway_url}}/v1/payments",
+					"host": [
+						"{{gateway_url}}"
+					],
+					"path": [
+						"v1",
+						"payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Create Payment (High Value)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"amount\": 50000.00,\n  \"currency\": \"USD\",\n  \"card\": {\n    \"holder_name\": \"MARIA SOUZA\",\n    \"token\": \"5555555555555555\",\n    \"expiry_month\": 5,\n    \"expiry_year\": 2028,\n    \"cvv\": \"456\"\n  },\n  \"customer\": {\n    \"id\": \"cust_987654321\",\n    \"email\": \"maria.souza@example.com\"\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{gateway_url}}/v1/payments",
+					"host": [
+						"{{gateway_url}}"
+					],
+					"path": [
+						"v1",
+						"payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Create Payment (Invalid)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"amount\": -50.00,\n  \"currency\": \"\",\n  \"card\": {\n    \"holder_name\": \"\",\n    \"token\": \"123\",\n    \"expiry_month\": 13,\n    \"expiry_year\": 2020,\n    \"cvv\": \"12\"\n  },\n  \"customer\": {\n    \"id\": \"\",\n    \"email\": \"invalid-email\"\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{gateway_url}}/v1/payments",
+					"host": [
+						"{{gateway_url}}"
+					],
+					"path": [
+						"v1",
+						"payments"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "auth_url",
+			"value": "http://localhost:9090",
+			"type": "string"
+		},
+		{
+			"key": "gateway_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

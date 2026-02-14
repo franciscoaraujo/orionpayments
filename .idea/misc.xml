@@ -9,10 +9,15 @@
         <option value="$PROJECT_DIR$/demo/pom.xml" />
         <option value="$PROJECT_DIR$/service-capture/pom.xml" />
         <option value="$PROJECT_DIR$/service-settlement/pom.xml" />
+        <option value="$PROJECT_DIR$/demo-quarkus/pom.xml" />
+        <option value="$PROJECT_DIR$/orionpay-api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/orionpay-api-gateway-bkp/pom.xml" />
+        <option value="$PROJECT_DIR$/orionpay-api-geteway/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
       <set>
+        <option value="$PROJECT_DIR$/demo-quarkus/pom.xml" />
         <option value="$PROJECT_DIR$/demo/pom.xml" />
       </set>
     </option>

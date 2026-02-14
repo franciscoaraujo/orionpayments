@@ -30,8 +30,8 @@ public class IdempotencyInterceptor implements HandlerInterceptor {
         final String idempotencyKey = request.getHeader(IDEMPOTENCY_KEY_HEADER);
         if (idempotencyKey == null || idempotencyKey.isBlank()) {
             log.warn("Idempotency-Key header está ausente em uma requisição POST.");
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "O header Idempotency-Key é obrigatório.");
-            return false;
+            // response.sendError(HttpServletResponse.SC_BAD_REQUEST, "O header Idempotency-Key é obrigatório.");
+            return true; // Permitir a requisição sem o header
         }
 
         String key = "idempotency:" + idempotencyKey;

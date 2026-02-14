@@ -33,7 +33,7 @@ services:
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: orionpay-db
+      POSTGRES_DB: orionpay_db
     ports:
       - "5432:5432"
     volumes:

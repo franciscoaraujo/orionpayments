@@ -1,47 +1,69 @@
-apiVersion: skaffold/v4beta7
+apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
-  name: orionpay
-
+  name: orionpay-local-env
 build:
   artifacts:
     - image: orionpay-authorization-service
-      context: ./orionpay-authorization-service
-      docker:
-        dockerfile: Dockerfile
-    - image: service-identity
-      context: ./service-identity
+      context: orionpay-authorization-service
       docker:
         dockerfile: Dockerfile
     - image: service-capture
-      context: ./service-capture
+      context: service-capture
+      docker:
+        dockerfile: Dockerfile
+    - image: service-identity
+      context: service-identity
       docker:
         dockerfile: Dockerfile
     - image: service-settlement
-      context: ./service-settlement
+      context: service-settlement
       docker:
         dockerfile: Dockerfile
-  tagPolicy:
-    sha256: {}
-
+    - image: orionpay-api-gateway
+      context: orionpay-api-gateway
+      docker:
+        dockerfile: Dockerfile
+        noCache: true
 manifests:
   rawYaml:
-    - k8s-manifests/*.yaml
-
-deploy:
-  kubectl: {}
-
+    - k8s-manifests/01-infra-namespace.yaml
+    - k8s-manifests/02-infra-secrets.yaml
+    - k8s-manifests/02a-infra-postgres-config.yaml
+    - k8s-manifests/03-infra-postgres.yaml
+    - k8s-manifests/04-infra-redis.yaml
+    - k8s-manifests/05-infra-kafka.yaml
+    - k8s-manifests/06-service-identity.yaml
+    - k8s-manifests/07-service-authorization.yaml
+    - k8s-manifests/08-service-capture.yaml
+    - k8s-manifests/09-service-settlement.yaml
+    - k8s-manifests/10-api-gateway.yaml
 portForward:
   - resourceType: service
-    resourceName: orionpay-authorization-service
+    resourceName: postgres
     namespace: orionpay
-    port: 8080
-    localPort: 8080
+    port: 5432
+    localPort: 5432
+  - resourceType: service
+    resourceName: redis-service
+    namespace: orionpay
+    port: 6379
+    localPort: 6379
+  - resourceType: service
+    resourceName: kafka-service
+    namespace: orionpay
+    port: 9092
+    localPort: 9092
   - resourceType: service
     resourceName: service-identity
     namespace: orionpay
     port: 9090
     localPort: 9090
+  - resourceType: service
+    resourceName: orionpay-authorization-service
+    namespace: orionpay
+    port: 8080
+    localPort: 8085
   - resourceType: service
     resourceName: service-capture
     namespace: orionpay
@@ -52,3 +74,8 @@ portForward:
     namespace: orionpay
     port: 8083
     localPort: 8083
+  - resourceType: service
+    resourceName: orionpay-api-gateway
+    namespace: orionpay
+    port: 8080
+    localPort: 8081

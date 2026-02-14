@@ -1,145 +1,271 @@
-# **OrionPay - Ecossistema de Processamento de Pagamentos**
 
-**OrionPay** é um projeto de simulação de um ecossistema de processamento de pagamentos, construído com uma arquitetura moderna de microserviços. O projeto foi desenvolvido para ser um estudo de caso prático sobre a criação de sistemas distribuídos, resilientes, seguros e escaláveis, utilizando as melhores práticas do mercado para aplicações financeiras.
+# OrionPay — Cloud-Native Payment Processing Ecosystem
 
-## 🏛️ Arquitetura
+![Java](https://img.shields.io/badge/Java-21-blue)
+![Spring Boot](https://img.shields.io/badge/SpringBoot-3-green)
+![Kafka](https://img.shields.io/badge/Kafka-Event--Driven-black)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-Cloud--Native-blue)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
+![Architecture](https://img.shields.io/badge/Architecture-Microservices-orange)
+![Status](https://img.shields.io/badge/Status-Production--Ready-success)
 
-A plataforma utiliza uma **arquitetura de microserviços** para garantir o desacoplamento e a escalabilidade de cada componente de negócio. Cada serviço é construído sobre a **Arquitetura Hexagonal (Ports & Adapters)**, isolando a lógica de negócio das tecnologias de infraestrutura.
+---
 
-```mermaid
-graph TD
-    subgraph Cliente
-        A[Sistema do Lojista]
-    end
+## Overview
 
-    subgraph "OrionPay Platform (Ambiente Local)"
-        B(servico-identidade)
-        C(servico-autorizacao)
-        D(Kafka)
-        E(servico-captura)
-        F[PostgreSQL]
-        G[Redis]
-    end
-    
-    A -- "1. Pede Token (REST)" --> B
-    B -- "2. Retorna JWT" --> A
-    A -- "3. Autoriza Pagamento (REST com JWT)" --> C
-    C -- "Usa Cache" --> G
-    C -- "Salva Transação/Outbox" --> F
-    C -- "4. Retorna Resposta Síncrona" --> A
-    C -- "5. Publica Evento" --> D
-    D -- "6. Entrega Evento" --> E
-    E -- "Salva Captura" --> F
-    E -- "7. Publica Próximo Evento" --> D
+**OrionPay** is a cloud-native, distributed **Payment Gateway Infrastructure** designed to process the complete lifecycle of credit card transactions at scale.
 
-```
+The platform follows **modern FinTech-grade architecture standards**:
 
-## 🚀 Tecnologias Utilizadas
+- Microservices & Hexagonal Architecture
+- Event-Driven & Eventually Consistent
+- Secure-by-Design (OAuth2 / OIDC / JWT)
+- High Availability & Fault Tolerant
+- Cloud-Native Kubernetes Deployment
 
-| Categoria | Tecnologia | Propósito |
-| :--- | :--- | :--- |
-| **Backend** | Java 21, Spring Boot 3 | Framework principal da aplicação |
-| **Segurança** | Spring Security, Spring Authorization Server | Autenticação e autorização com OAuth2 e JWT |
-| **Persistência** | Spring Data JPA, Hibernate, PostgreSQL | Armazenamento de dados transacionais |
-| **Mensageria** | Spring for Kafka, Apache Kafka | Comunicação assíncrona e orientada a eventos |
-| **Cache** | Spring Cache, Redis | Cache distribuído para otimização de performance |
-| **Resiliência** | Resilience4j | Aplicação de padrões como Circuit Breaker e Retry |
-| **Infraestrutura** | Docker, Docker Compose | Containerização e orquestração do ambiente de desenvolvimento |
-| **Utilitários** | Lombok, MapStruct, Micrometer | Redução de boilerplate e observabilidade |
+Designed for **high-volume asynchronous processing**, financial reconciliation, and horizontal scalability.
 
-## ⚙️ Como Executar o Ambiente
+---
 
-Este projeto é totalmente containerizado, facilitando a execução do ecossistema completo com um único comando.
+## C4 Model — System Context
 
-### Pré-requisitos
+│
+▼
+OrionPay Platform (Kubernetes Cluster)
+│
+├── Identity Service (OAuth2 / JWT)
+├── API Gateway (Routing / Security)
+├── Authorization Engine (Sync Processing)
+├── Kafka Event Backbone
+├── Capture Service (Async Processing)
+├── Settlement Service (Financial Reconciliation)
+├── PostgreSQL (Per-Service Database)
+└── Redis (Low-Latency Cache)
 
-  * **Docker** e **Docker Compose**
-  * **Java JDK 21** (ou superior)
-  * **Apache Maven**
 
-### Iniciando o Ambiente
 
-1.  Clone os repositórios de todos os serviços (`service-identity`, `orionpay-authorization-service`, `service-capture`) para uma pasta raiz.
+---
 
-2.  Certifique-se de que o arquivo `docker-compose.yml` principal esteja nesta mesma pasta raiz.
+## Container Diagram
 
-3.  Abra um terminal na pasta raiz e execute o seguinte comando:
+[ Merchant App ]
+│
+▼
+[ API Gateway ]
+│
+├── Identity Service
+├── Authorization Service
+│ ├── Redis Cache
+│ └── PostgreSQL
+│
+└── Kafka
+├── Capture Service → PostgreSQL
+└── Settlement Service → PostgreSQL
 
-    ```bash
-    docker-compose up --build
-    ```
 
-    Este comando irá construir as imagens Docker de cada serviço e iniciar todos os contêineres (aplicações, bancos de dados, Kafka, etc.). Aguarde até que todos os serviços estejam saudáveis.
 
-## ⚡ Testando o Fluxo End-to-End
+---
 
-Após iniciar o ambiente, você pode simular uma transação completa usando um cliente de API como o Postman ou `cURL`.
+## Architecture Principles
 
-#### Passo 1: Obter o Token de Acesso
+- Hexagonal Architecture (Ports & Adapters)
+- Database per Service
+- Event-Driven Microservices
+- Idempotent Consumers
+- Eventually Consistent Financial State
+- Zero-Downtime Deployment (K8s Probes + Init Containers)
+- Secure-by-Design (OIDC + JWT + Token Validation)
 
-Primeiro, peça um token de acesso ao `servico-identidade`.
+---
+
+## Technology Stack
+
+| Category | Technology |
+|----------|-----------|
+| Language | Java 21 |
+| Framework | Spring Boot 3 |
+| Gateway | Spring Cloud Gateway |
+| Security | Spring Security, OAuth2, JWT, OIDC |
+| Messaging | Apache Kafka |
+| Database | PostgreSQL |
+| Cache | Redis |
+| Orchestration | Kubernetes, Minikube, Skaffold |
+| Observability | Health Probes, Logs |
+| Architecture | Microservices + Hexagonal |
+
+---
+
+## Services
+
+| Service | Port | Responsibility |
+|---------|------|----------------|
+| api-gateway | 8080 | Entry point, routing, token validation |
+| identity-service | 9090 | OAuth2 Identity Provider, JWT issuance |
+| authorization-service | 8081 | Real-time payment authorization |
+| capture-service | 8082 | Async capture processing |
+| settlement-service | 8083 | Financial settlement & reconciliation |
+
+---
+
+## End-to-End Flow
+
+1. Client authenticates → receives JWT
+2. Payment Authorization (Sync)
+3. Transaction persisted
+4. Event published to Kafka
+5. Capture Service processes asynchronously
+6. Settlement Service finalizes transaction
+
+---
+
+## Running Locally
+
+### Requirements
+
+- Docker Desktop (Kubernetes enabled)
+- Minikube
+- Skaffold
+- kubectl
+
+### Start Environment
 
 ```bash
-curl --location 'http://localhost:9090/oauth2/token' \
---header 'Content-Type: application/x-www-form-urlencoded' \
---user 'orionpay-merchant-client:secret' \
---data-urlencode 'grant_type=client_credentials' \
---data-urlencode 'scope=payments.authorize'
-```
+minikube start --memory 8192 --cpus 4
+skaffold dev --port-forward --status-check=false --cleanup=false
 
-Copie o valor do `"access_token"` da resposta.
 
-#### Passo 2: Enviar um Pagamento para Autorização
+curl http://localhost:8080/api/v1/auth/login \
+-H "Content-Type: application/json" \
+-d '{"username":"admin","password":"password123"}'
 
-Agora, use o token obtido para fazer uma chamada ao `servico-autorizacao`.
+
+curl http://localhost:8080/api/v1/payments/authorize \
+-H "Authorization: Bearer TOKEN" \
+-H "Content-Type: application/json" \
+-d '{ "amount":125.50, "currency":"BRL" }'
+
+
+
+---
+
+# ARCHITECTURE.md
+
+```markdown
+# OrionPay Architecture
+
+## Architectural Style
+
+- Microservices
+- Hexagonal Architecture
+- Event-Driven
+- Cloud-Native
+
+## Core Design Decisions
+
+### Database per Service
+Each microservice owns its data → prevents coupling.
+
+### Event-Driven Processing
+Kafka used for async financial state transitions:
+- Authorization → Capture → Settlement
+
+### Consistency Model
+Eventual consistency ensures:
+- High throughput
+- Resilience
+- Non-blocking processing
+
+### Scalability
+Services are stateless and horizontally scalable.
+
+### Fault Tolerance
+- Kafka retry safety
+- Idempotent processing
+- K8s restart strategies
+
+---
+
+## Transaction Lifecycle
+
+1. Authorization (Sync)
+2. Capture (Async)
+3. Settlement (Async)
+
+---
+
+## Design Patterns Used
+
+- Hexagonal Architecture
+- Event Sourcing (lightweight)
+- CQRS (separation of read/write)
+- Circuit-breaker ready
+- Retry safe consumers
+
+
+# Deployment Guide
+
+## Environment
+
+Local Kubernetes via Minikube.
+
+## Start Cluster
 
 ```bash
-# Cole o token copiado na variável abaixo
-TOKEN="<SEU_TOKEN_AQUI>"
+minikube start --memory 8192 --cpus 4
 
-# Gere uma chave de idempotência única
-IDEMPOTENCY_KEY=$(uuidgen)
+skaffold dev --port-forward
 
-curl --location 'http://localhost:8080/v1/payments' \
---header "Authorization: Bearer $TOKEN" \
---header "Idempotency-Key: $IDEMPOTENCY_KEY" \
---header 'Content-Type: application/json' \
---data '{
-    "amount": 100.50,
-    "currency": "BRL",
-    "card": {
-        "holder_name": "NOME DO CLIENTE",
-        "number": "4111222233334444",
-        "expiry_month": 12,
-        "expiry_year": 2028,
-        "cvv": "123"
-    },
-    "customer": {
-        "id": "cust_abc123",
-        "email": "cliente@email.com"
-    }
-}'
-```
+kubectl get pods
 
-Se tudo estiver correto, você receberá uma resposta `HTTP 201 Created` e poderá observar nos logs do `service-capture` que o evento foi consumido e processado.
+kubectl port-forward svc/api-gateway 8080:8080
 
-## 🗺️ Visão Geral dos Serviços
+skaffold delete
+minikube stop
 
-| Serviço | Porta Exposta | Responsabilidade Principal |
-| :--- | :--- | :--- |
-| **`service-identity`** | `9090` | Servidor de Autorização OAuth2, responsável por emitir tokens JWT. |
-| **`orionpay-authorization-service`** | `8080` | Processamento síncrono de pagamentos, validação de regras e publicação de eventos. |
-| **`service-capture`** | `8082` | Processamento assíncrono de capturas via Kafka, com gestão de falhas e DLQ. |
 
-## 🛣️ Roadmap Futuro
 
-  * [ ] **`servico-liquidacao`**: Para conciliação e liquidação financeira.
-  * [ ] **`servico-antifraude`**: Para análise de risco em tempo real.
-  * [ ] **`servico-notificacao`**: Para envio de webhooks aos lojistas.
-  * [ ] **API Gateway**: Implementar um ponto de entrada único para o ecossistema.
-  * [ ] **Pipeline de CI/CD**: Automatizar o build, teste e deploy em um ambiente Kubernetes.
+---
 
------
+# SECURITY.md
 
-**Autor:** Francisco Araujo
-**Licença:** MIT
+```markdown
+# Security Architecture
+
+## Identity & Authentication
+
+- OAuth2 / OpenID Connect
+- JWT signed tokens
+- Stateless authentication
+
+## Authorization
+
+- Token validation at Gateway
+- Scope-based access control
+- Service-to-service trust via JWT
+
+## Data Protection
+
+- No card data persisted in plaintext
+- Secure token-based processing
+- Encryption at rest (DB)
+- TLS in transit
+
+## Infrastructure Security
+
+- Kubernetes Network Policies
+- Isolated service databases
+- Secrets via Kubernetes Secrets
+
+## Secure-by-Design Principles
+
+- Zero Trust
+- Least Privilege
+- Stateless tokens
+- Token expiration & refresh
+
+## Future Enhancements
+
+- mTLS between services
+- HSM-backed signing keys
+- PCI-DSS compliance layer
+- Audit & Fraud detection pipeline

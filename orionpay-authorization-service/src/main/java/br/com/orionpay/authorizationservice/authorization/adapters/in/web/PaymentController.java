@@ -26,12 +26,12 @@ public class PaymentController {
     @PostMapping
     public ResponseEntity<PaymentResponse> authorize(
             @RequestBody @Valid PaymentRequest request,
-            @RequestHeader("Idempotency-Key") String idempotencyKey,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
             @AuthenticationPrincipal Jwt jwt) { // Injeta o JWT validado
 
         // Agora podemos acessar os dados do token, como o ID do cliente (lojista)
-        String clientId = jwt.getSubject(); // O "subject" do JWT geralmente é o client_id
-        log.info("Authorization request received from authenticated client ${clientId}");
+        String clientId = jwt != null ? jwt.getSubject() : "unknown"; // O "subject" do JWT geralmente é o client_id
+        log.info("Authorization request received from authenticated client {}", clientId);
 
 
         Payment payment = paymentRestMapper.toDomain(request);

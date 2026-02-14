@@ -1,0 +1,15 @@
+{
+  "amount": 50000.00,
+  "currency": "USD",
+  "card": {
+    "holder_name": "MARIA SOUZA",
+    "token": "5555555555555555",
+    "expiry_month": 5,
+    "expiry_year": 2028,
+    "cvv": "456"
+  },
+  "customer": {
+    "id": "cust_987654321",
+    "email": "maria.souza@example.com"
+  }
+}
