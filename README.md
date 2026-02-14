@@ -92,7 +92,7 @@ Designed for **high-volume asynchronous processing**, financial reconciliation, 
 
 ### Start Environment
 
-```bash
+
 minikube start --memory 8192 --cpus 4
 skaffold dev --port-forward --status-check=false --cleanup=false
 
