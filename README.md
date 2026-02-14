@@ -25,24 +25,7 @@ The platform follows **modern FinTech-grade architecture standards**:
 
 Designed for **high-volume asynchronous processing**, financial reconciliation, and horizontal scalability.
  ## Sequential Diagram
-CLIENTE          GATEWAY          IDENTITY          AUTH-SVC          KAFKA          SETTLEMENT
-|                |                |                 |                |                |
-|-- POST Login ->|                |                 |                |                |
-|                |--- Validar --->|                 |                |                |
-|                |<--- JWT Token -|                 |                |                |
-|<-- 200 OK -----|                |                 |                |                |
-|                |                |                 |                |                |
-|-- Autorizar -->|                |                 |                |                |
-|                |-- Val. JWT --->|                 |                |                |
-|                |----------------|-- Autorizar --->|                |                |
-|                |                |                 |-- Persistir -->|                |
-|                |                |                 |-- Emitir Evt ->|                |
-|                |                |                 |                |-- Evento ---->|
-|                |<---------------|-- 200 OK -------|                |                |
-|<-- Sucesso ----|                |                 |                |                |
-|                |                |                 |                |                |
-|                |                |                 |                | <--- Consome --|
-|                |                |                 |                |                |-- Liquidar ->
+<img width="1026" height="432" alt="image" src="https://github.com/user-attachments/assets/9991a02b-ee1b-4cd7-83de-aea62d2c48bc" />
 
 ---
 
