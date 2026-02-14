@@ -1,4 +1,7 @@
-# ARCHITECTURE
+
+---
+
+# ARCHITECTURE.md — Principal Level
 
 ```markdown
 # Architecture Deep Dive
