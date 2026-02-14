@@ -24,45 +24,25 @@ The platform follows **modern FinTech-grade architecture standards**:
 - Cloud-Native Kubernetes Deployment
 
 Designed for **high-volume asynchronous processing**, financial reconciliation, and horizontal scalability.
-
----
-
-## C4 Model — System Context
-
-│
-▼
-OrionPay Platform (Kubernetes Cluster)
-│
-├── Identity Service (OAuth2 / JWT)
-├── API Gateway (Routing / Security)
-├── Authorization Engine (Sync Processing)
-├── Kafka Event Backbone
-├── Capture Service (Async Processing)
-├── Settlement Service (Financial Reconciliation)
-├── PostgreSQL (Per-Service Database)
-└── Redis (Low-Latency Cache)
-
-
-
----
-
-## Container Diagram
-
-[ Merchant App ]
-│
-▼
-[ API Gateway ]
-│
-├── Identity Service
-├── Authorization Service
-│ ├── Redis Cache
-│ └── PostgreSQL
-│
-└── Kafka
-├── Capture Service → PostgreSQL
-└── Settlement Service → PostgreSQL
-
-
+ ## Sequential Diagram
+CLIENTE          GATEWAY          IDENTITY          AUTH-SVC          KAFKA          SETTLEMENT
+|                |                |                 |                |                |
+|-- POST Login ->|                |                 |                |                |
+|                |--- Validar --->|                 |                |                |
+|                |<--- JWT Token -|                 |                |                |
+|<-- 200 OK -----|                |                 |                |                |
+|                |                |                 |                |                |
+|-- Autorizar -->|                |                 |                |                |
+|                |-- Val. JWT --->|                 |                |                |
+|                |----------------|-- Autorizar --->|                |                |
+|                |                |                 |-- Persistir -->|                |
+|                |                |                 |-- Emitir Evt ->|                |
+|                |                |                 |                |-- Evento ---->|
+|                |<---------------|-- 200 OK -------|                |                |
+|<-- Sucesso ----|                |                 |                |                |
+|                |                |                 |                |                |
+|                |                |                 |                | <--- Consome --|
+|                |                |                 |                |                |-- Liquidar ->
 
 ---
 
